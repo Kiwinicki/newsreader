@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "news-reader"
+version = "0.1.0"
+description = ""
+authors = ["Kiwinicki <szefek24@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2.9.2"
+aiohttp = "^3.11.2"
+fastapi = "^0.115.5"
+ruff = "^0.7.4"
+uvicorn = "^0.32.0"
+python-dotenv = "^1.0.1"
+dependency-injector = "^4.43.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.13.0"
+
+[tool.ruff]
+line-length = 80
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

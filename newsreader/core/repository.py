@@ -8,6 +8,18 @@ class IUserRepository(ABC):
     async def get_by_id(self, user_id: int) -> Optional[User]:
         pass
 
+    async def get_by_id(user_id) -> Optional[User]:
+        pass
+
+    async def create_user(self, user: User) -> int:
+        pass
+
+    async def delete_user(self, user_id: int) -> None:
+        pass
+
+    async def update_user(self, user_id: int, user_data: User) -> None:
+        pass
+
 
 class INewsRepository(ABC):
     @abstractmethod

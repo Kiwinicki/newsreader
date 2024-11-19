@@ -14,6 +14,16 @@ class UserService(IUserService):
     async def get_user_by_id(self, user_id: int) -> Optional[User]:
         return await self._repository.get_by_id(user_id)
     
+    async def create_user(self, user: User) -> int:
+        return await self._repository.create_user(user)
+
+    async def delete_user(self, user_id: int) -> None:
+        await self._repository.delete_user(user_id)
+
+    async def update_user(self, user_id: int, user_data: User) -> None:
+        await self._repository.update_user(user_id=user_id, user_data=user_data)
+
+
 class NewsService(INewsService):
     _repository: INewsRepository
 

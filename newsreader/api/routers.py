@@ -19,6 +19,35 @@ async def get_user_by_id(
 ) -> Optional[User]:
     return await service.get_user_by_id(user_id)
 
+@user_router.post("/create")
+@inject
+async def create_user(
+    user: User,
+    service: IUserService = Depends(Provide[Container.user_service]),
+) -> int:
+    return await service.create_user(user)
+
+@user_router.post("/delete")
+@inject
+async def delete_user(
+    user_id: int,
+    service: IUserService = Depends(Provide[Container.user_service]),
+) -> None:
+    return await service.delete_user(user_id)
+
+@user_router.put("/update")
+@inject
+async def update_user(
+    user_id: int,
+    user_data: User,
+    service: IUserService = Depends(Provide[Container.user_service]),
+) -> None:
+    return await service.update_user(user_id, user_data)
+
+
+
+
+
 @news_router.get("/top", response_model=List[News])
 @inject
 async def get_top_news(

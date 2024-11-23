@@ -1,9 +1,20 @@
 # News reader (API: https://www.thenewsapi.com/)
 
 ## Run
+
+### Locally
+
 install project: `make install`
 
 run project: `make run`
+
+### Docker
+
+build: `docker compose build`
+
+run: `docker compose up`
+
+stop: `docker compose down` - Removed or `Ctrl+C` - Stopped
 
 ## Functionality:
 - latest news
@@ -25,3 +36,4 @@ run project: `make run`
 - [ ] domain models (User, News)
 - [x] dependency injection containers
 - [ ] database
+- [x] docker

@@ -17,11 +17,11 @@ run project: `make run`
 - /api: FastAPI routers, uses services from /core (handles requests from client)
 
 ## TODO:
-- [-] fastapi routers (user CRUD and top/all/uuid news)
-- [-] repository interface
-- [-] service interface
-- [-] repository (initial) implementation
-- [-] service (initial) implementation
-- [-] domain models (User, News)
+- [ ] fastapi routers (user CRUD and top/all/uuid news)
+- [ ] repository interface
+- [ ] service interface
+- [ ] repository (initial) implementation
+- [ ] service (initial) implementation
+- [ ] domain models (User, News)
 - [x] dependency injection containers
 - [ ] database

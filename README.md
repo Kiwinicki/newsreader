@@ -35,5 +35,6 @@ stop: `docker compose down` - Removed or `Ctrl+C` - Stopped
 - [ ] service (initial) implementation
 - [ ] domain models (User, News)
 - [x] dependency injection containers
-- [ ] database
+- [x] database
 - [x] docker
+- [ ] HTTP exceptions

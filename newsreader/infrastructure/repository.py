@@ -4,10 +4,11 @@ import aiohttp
 import os
 
 from newsreader.core.domain import News, User
+from newsreader.db import user_table, database
 from newsreader.core.repository import IUserRepository, INewsRepository
 
 
-class UserRepository(IUserRepository):
+class UserRepositoryMock(IUserRepository):
     def __init__(self):
         self.users_db = {
             0: User(id=0, name="John Doe"),
@@ -59,3 +60,24 @@ class NewsRepository(INewsRepository):
                     return data.get("data", [])
                 else:
                     return []
+
+class UserRepositoryDB(IUserRepository):
+    async def get_by_id(self, user_id: int) -> User | None:
+        query = user_table.select().where(user_table.c.id == user_id)
+        result = await database.fetch_one(query)
+        if result:
+            return User.model_validate(result)
+        return None
+
+    async def create_user(self, user: User) -> int:
+        query = user_table.insert().values(**user.model_dump(exclude={"id"}))
+        user_id = await database.execute(query)
+        return user_id
+
+    async def delete_user(self, user_id: int) -> None:
+        query = user_table.delete().where(user_table.c.id == user_id)
+        await database.execute(query)
+
+    async def update_user(self, user_id: int, user_data: User) -> None:
+        query = user_table.update().where(user_table.c.id == user_id).values(**user_data.model_dump(exclude={"id"}))
+        await database.execute(query)

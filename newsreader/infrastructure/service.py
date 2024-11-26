@@ -5,7 +5,6 @@ from newsreader.core.service import IUserService, INewsService
 
 
 class UserService(IUserService):
-
     _repository: IUserRepository
 
     def __init__(self, repository: IUserRepository):
@@ -37,3 +36,15 @@ class NewsService(INewsService):
         language: Optional[str] = None,
     ) -> List[News]:
         return await self._repository.get_top(limit, categories, language)
+    
+    async def get_all_news(
+        self,
+        limit: int = 10,
+        search: Optional[str] = None,
+        categories: Optional[List[str]] = None,
+        language: Optional[str] = None,
+    ) -> List[News]:
+        return await self._repository.get_all(limit, search, categories, language)
+
+    async def get_news_by_id(self, news_id: str) -> List[News]:
+        return await self._repository.get_by_id(news_id)

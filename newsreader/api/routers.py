@@ -57,3 +57,22 @@ async def get_top_news(
     service: INewsService = Depends(Provide[Container.news_service]),
 ) -> List[News]:
     return await service.get_top_news(limit=limit, categories=categories, language=language)
+
+@news_router.get("/all", response_model=List[News])
+@inject
+async def get_all_news(
+    limit: int = 10,
+    search: Optional[str] = Query(None),
+    categories: Optional[List[str]] = Query(None),
+    language: Optional[str] = None,
+    service: INewsService = Depends(Provide[Container.news_service]),
+) -> List[News]:
+    return await service.get_all_news(search=search, limit=limit, categories=categories, language=language)
+
+@news_router.get("/{news_id}", response_model=News)
+@inject
+async def get_news_by_id(
+    news_id: str,
+    service: INewsService = Depends(Provide[Container.news_service]),
+) -> List[News]:
+    return await service.get_news_by_id(news_id)

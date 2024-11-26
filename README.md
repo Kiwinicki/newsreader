@@ -28,12 +28,12 @@ stop: `docker compose down` - Removed or `Ctrl+C` - Stopped
 - /api: FastAPI routers, uses services from /core (handles requests from client)
 
 ## TODO:
-- [ ] fastapi routers (user CRUD and top/all/uuid news)
-- [ ] repository interface
-- [ ] service interface
+- [x] fastapi routers (user CRUD and top/all/uuid news)
+- [x] repository interface
+- [x] service interface
 - [ ] repository (initial) implementation
-- [ ] service (initial) implementation
-- [ ] domain models (User, News)
+- [x] service (initial) implementation
+- [x] domain models (User, News)
 - [x] dependency injection containers
 - [x] database
 - [x] docker

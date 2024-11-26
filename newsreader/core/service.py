@@ -31,3 +31,20 @@ class INewsService(ABC):
         language: Optional[str] = None,
     ) -> List[News]:
         pass
+
+    @abstractmethod
+    async def get_all_news(
+        self,
+        limit: int = 10,
+        search: Optional[str] = None,
+        categories: Optional[List[str]] = None,
+        language: Optional[str] = None,
+    ) -> List[News]:
+        pass
+
+    @abstractmethod
+    async def get_news_by_id(
+        self,
+        news_id: str
+    ) -> List[News]:
+        pass

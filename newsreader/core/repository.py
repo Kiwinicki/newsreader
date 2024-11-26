@@ -30,3 +30,20 @@ class INewsRepository(ABC):
         language: Optional[str] = None,
     ) -> List[News]:
         pass
+
+    @abstractmethod
+    async def get_all(
+        self,
+        limit: int = 10,
+        search: Optional[str] = None,
+        categories: Optional[List[str]] = None,
+        language: Optional[str] = None,
+    ) -> List[News]:
+        pass
+
+    @abstractmethod
+    async def get_by_id(
+        self,
+        news_id: str
+    ) -> List[News]:
+        pass

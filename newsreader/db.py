@@ -22,6 +22,13 @@ user_table = sqlalchemy.Table(
     sqlalchemy.Column("name", sqlalchemy.String),
 )
 
+user_friends_table = sqlalchemy.Table(
+    "user_friends",
+    metadata,
+    sqlalchemy.Column("user_id", sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"), primary_key=True),
+    sqlalchemy.Column("friend_id", sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"), primary_key=True),
+)
+
 db_uri = (
     f"postgresql+asyncpg://{config.DB_USER}:{config.DB_PASSWORD}"
     f"@{config.DB_HOST}/{config.DB_NAME}"

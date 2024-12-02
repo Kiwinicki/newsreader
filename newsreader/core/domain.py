@@ -2,12 +2,6 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
-class User(BaseModel):
-    id: int
-    name: str
-
-    model_config = ConfigDict(from_attributes=True, extra="ignore")
-
 class News(BaseModel):
     uuid: str
     title: str
@@ -21,5 +15,13 @@ class News(BaseModel):
     source: str
     categories: List[str]
     relevance_score: Optional[float] = None
+
+    model_config = ConfigDict(from_attributes=True, extra="ignore")
+
+class User(BaseModel):
+    id: int
+    name: str
+    favorite: List[News] = []
+    friends: List[int] = []
 
     model_config = ConfigDict(from_attributes=True, extra="ignore")

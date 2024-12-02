@@ -3,9 +3,9 @@ from typing import List, Optional, Union, Dict
 import aiohttp
 import os
 from urllib.parse import quote
-
+from sqlalchemy import select, delete, insert
 from newsreader.core.domain import News, User
-from newsreader.db import user_table, database
+from newsreader.db import user_table, user_friends_table, database
 from newsreader.core.repository import IUserRepository, INewsRepository
 
 
@@ -105,18 +105,55 @@ class UserRepositoryDB(IUserRepository):
         query = user_table.select().where(user_table.c.id == user_id)
         result = await database.fetch_one(query)
         if result:
-            return User.model_validate(result)
+            user = User.model_validate(result)
+            user.friends = await self.get_friend_ids(user_id)
+            return user
         return None
 
+    async def get_friend_ids(self, user_id: int) -> List[int]:
+        query = select(user_friends_table.c.friend_id).where(user_friends_table.c.user_id == user_id)
+        results = await database.fetch_all(query)
+        return [row['friend_id'] for row in results] if results else []
+
+    async def get_friends(self, user_id: int) -> List[int]:
+        friend_ids = await self.get_friend_ids(user_id)
+        return friend_ids
+    
     async def create_user(self, user: User) -> int:
         query = user_table.insert().values(**user.model_dump(exclude={"id"}))
         user_id = await database.execute(query)
         return user_id
 
     async def delete_user(self, user_id: int) -> None:
-        query = user_table.delete().where(user_table.c.id == user_id)
-        await database.execute(query)
+        # first delete user from friends, second delete user 
+        del_friend_query1 = delete(user_friends_table).where(
+            (user_friends_table.c.user_id == user_id) | (user_friends_table.c.friend_id == user_id)
+        )
+        del_user_query2 = delete(user_table).where(user_table.c.id == user_id)
+        
+        async with database.transaction():
+            await database.execute(del_friend_query1)
+            await database.execute(del_user_query2)
 
     async def update_user(self, user_id: int, user_data: User) -> None:
-        query = user_table.update().where(user_table.c.id == user_id).values(**user_data.model_dump(exclude={"id"}))
+        query = user_table.update().where(user_table.c.id == user_id).values(name=user_data.name)
+        await database.execute(query)
+
+    async def add_friend(self, user_id: int, friend_id: int) -> None:
+        # check if both users exist
+        query_user = select(user_table).where(user_table.c.id == user_id)
+        query_friend = select(user_table).where(user_table.c.id == friend_id)
+        user = await database.fetch_one(query_user)
+        friend = await database.fetch_one(query_friend)
+
+        if user and friend and user_id != friend_id:
+            query = insert(user_friends_table).values(user_id=user_id, friend_id=friend_id)
+            await database.execute(query)
+        else:
+            raise ValueError("User or friend not exist")
+
+    async def delete_friend(self, user_id: int, friend_id: int) -> None:
+        query = delete(user_friends_table).where(
+            (user_friends_table.c.user_id == user_id) & (user_friends_table.c.friend_id == friend_id)
+        )
         await database.execute(query)

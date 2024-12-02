@@ -22,6 +22,15 @@ class UserService(IUserService):
     async def update_user(self, user_id: int, user_data: User) -> None:
         await self._repository.update_user(user_id=user_id, user_data=user_data)
 
+    async def get_friends(self, user_id: int) -> List[int]:
+        return await self._repository.get_friends(user_id)
+
+    async def add_friend(self, user_id: int, friend_id: int) -> None:
+        return await self._repository.add_friend(user_id, friend_id)
+
+    async def delete_friend(self, user_id: int, friend_id: int) -> None:
+        return await self._repository.delete_friend(user_id, friend_id)
+
 
 class NewsService(INewsService):
     _repository: INewsRepository

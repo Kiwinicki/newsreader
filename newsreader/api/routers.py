@@ -27,7 +27,7 @@ async def create_user(
 ) -> int:
     return await service.create_user(user)
 
-@user_router.post("/delete")
+@user_router.delete("/{user_id}")
 @inject
 async def delete_user(
     user_id: int,
@@ -35,7 +35,7 @@ async def delete_user(
 ) -> None:
     return await service.delete_user(user_id)
 
-@user_router.put("/update")
+@user_router.put("/{user_id}")
 @inject
 async def update_user(
     user_id: int,
@@ -44,6 +44,31 @@ async def update_user(
 ) -> None:
     return await service.update_user(user_id, user_data)
 
+@user_router.get("/{user_id}/friends", response_model=List[int])
+@inject
+async def get_user_friends(
+    user_id: int,
+    service: IUserService = Depends(Provide[Container.user_service]),
+):
+    return await service.get_friends(user_id)
+
+@user_router.post("/{user_id}/friends")
+@inject
+async def add_user_friend(
+    user_id: int,
+    friend_id: int,
+    service: IUserService = Depends(Provide[Container.user_service]),
+):
+    return await service.add_friend(user_id, friend_id)
+
+@user_router.delete("/{user_id}/friends/{friend_id}")
+@inject
+async def delete_user_friend(
+    user_id: int,
+    friend_id: int,
+    user_service: IUserService = Depends(Provide[Container.user_service]),
+):
+    return await user_service.delete_friend(user_id, friend_id)
 
 
 

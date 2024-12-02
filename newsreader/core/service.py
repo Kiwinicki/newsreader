@@ -21,6 +21,18 @@ class IUserService(ABC):
     async def update_user(self, user_id: int, user_data: User) -> None:
         pass
 
+    @abstractmethod
+    async def get_friends(self, user_id: int) -> List[User]:
+        pass
+
+    @abstractmethod
+    async def add_friend(self, user_id: int, friend_id: int) -> None:
+        pass
+    
+    @abstractmethod
+    async def delete_friend(self, user_id: int, friend_id: int) -> None:
+        pass
+
 
 class INewsService(ABC):
     @abstractmethod

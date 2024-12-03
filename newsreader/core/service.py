@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from newsreader.core.domain import News, User
+from newsreader.core.domain import News, User, NewsPreview
 
 
 class IUserService(ABC):
@@ -34,11 +34,11 @@ class IUserService(ABC):
         pass
 
     @abstractmethod
-    async def get_favorites(self, user_id: int) -> List[News]:
+    async def get_favorites(self, user_id: int) -> List[NewsPreview]:
         pass
 
     @abstractmethod
-    async def add_to_favorites(self, user_id: int, news_id: str) -> None:
+    async def add_to_favorites(self, user_id: int, news_id: str, title: str) -> None:
         pass
 
     @abstractmethod

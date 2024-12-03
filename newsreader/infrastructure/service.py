@@ -1,5 +1,5 @@
 from typing import List, Optional
-from newsreader.core.domain import User, News
+from newsreader.core.domain import User, News, NewsPreview
 from newsreader.core.repository import IUserRepository, INewsRepository
 from newsreader.core.service import IUserService, INewsService
 
@@ -30,6 +30,15 @@ class UserService(IUserService):
 
     async def delete_friend(self, user_id: int, friend_id: int) -> None:
         return await self._repository.delete_friend(user_id, friend_id)
+    
+    async def get_favorites(self, user_id: int) -> List[NewsPreview]:
+        return await self._repository.get_favorites(user_id)
+
+    async def add_to_favorites(self, user_id: int, news_id: str, title: str) -> None:
+        await self._repository.add_to_favorites(user_id, news_id, title)
+        
+    async def delete_from_favorites(self, user_id: int, news_id: str) -> None:
+        await self._repository.delete_from_favorites(user_id, news_id)
 
 
 class NewsService(INewsService):

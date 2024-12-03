@@ -4,8 +4,8 @@ import aiohttp
 import os
 from urllib.parse import quote
 from sqlalchemy import select, delete, insert
-from newsreader.core.domain import News, User
-from newsreader.db import user_table, user_friends_table, database
+from newsreader.core.domain import News, User, NewsPreview
+from newsreader.db import user_table, user_friends_table, user_favorites, database
 from newsreader.core.repository import IUserRepository, INewsRepository
 
 
@@ -157,5 +157,24 @@ class UserRepositoryDB(IUserRepository):
     async def delete_friend(self, user_id: int, friend_id: int) -> None:
         query = delete(user_friends_table).where(
             (user_friends_table.c.user_id == user_id) & (user_friends_table.c.friend_id == friend_id)
+        )
+        await database.execute(query)
+
+    async def get_favorites(self, user_id: int) -> List[NewsPreview]:
+        query = select(user_favorites.c.news_id, user_favorites.c.title).where(user_favorites.c.user_id == user_id)
+        results = await database.fetch_all(query)
+        return [NewsPreview(uuid=row["news_id"], title=row["title"]) for row in results] # minimal info (retrive from API for all details)
+
+    async def add_to_favorites(self, user_id: int, news_id: str, title: str) -> None:
+        query = insert(user_favorites).values(
+            user_id=user_id,
+            news_id=news_id,
+            title=title
+        )
+        await database.execute(query)
+
+    async def delete_from_favorites(self, user_id: int, news_id: str) -> None:
+        query = delete(user_favorites).where(
+            (user_favorites.c.user_id == user_id) & (user_favorites.c.news_id == news_id)
         )
         await database.execute(query)

@@ -18,10 +18,16 @@ class News(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, extra="ignore")
 
+class NewsPreview(BaseModel):
+    uuid: str
+    title: str
+
+    model_config = ConfigDict(from_attributes=True, extra="ignore")
+
 class User(BaseModel):
     id: int
     name: str
-    # favorites: List[str] = []
+    favorites: List[NewsPreview] = []
     friends: List[int] = []
 
     model_config = ConfigDict(from_attributes=True, extra="ignore")

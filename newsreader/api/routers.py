@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 
 
 from newsreader.container import Container
-from newsreader.core.domain import User, News
+from newsreader.core.domain import User, News, NewsPreview
 from newsreader.core.service import IUserService, INewsService
 
 user_router = APIRouter()
@@ -70,6 +70,32 @@ async def delete_user_friend(
 ):
     return await user_service.delete_friend(user_id, friend_id)
 
+@user_router.get("/{user_id}/favorites", response_model=List[NewsPreview])
+@inject
+async def get_favorites(
+    user_id: int,
+    user_service: IUserService = Depends(Provide[Container.user_service]),
+):
+    return await user_service.get_favorites(user_id)
+
+@user_router.post("/{user_id}/favorites")
+@inject
+async def add_to_favorites(
+    user_id: int,
+    news_id: str,
+    title: str,
+    user_service: IUserService = Depends(Provide[Container.user_service]),
+):
+    return await user_service.add_to_favorites(user_id, news_id, title)
+
+@user_router.delete("/{user_id}/favorites")
+@inject
+async def delete_from_favorites(
+    user_id: int,
+    news_id: str,
+    user_service: IUserService = Depends(Provide[Container.user_service]),
+):
+    return await user_service.delete_from_favorites(user_id, news_id)
 
 
 

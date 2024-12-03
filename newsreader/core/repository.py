@@ -36,6 +36,18 @@ class IUserRepository(ABC):
     async def delete_friend(self, user_id: int, friend_id: int) -> None:
         pass
 
+    @abstractmethod
+    async def get_favorites(self, user_id: int) -> List[News]:
+        pass
+
+    @abstractmethod
+    async def add_to_favorites(self, user_id: int, news_id: str) -> None:
+        pass
+
+    @abstractmethod
+    async def delete_from_favorites(self, user_id: int, news_id: str) -> None:
+        pass
+
 
 class INewsRepository(ABC):
     @abstractmethod

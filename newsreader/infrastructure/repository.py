@@ -114,13 +114,9 @@ class UserRepositoryDB(IUserRepository):
         query = select(user_friends_table.c.friend_id).where(user_friends_table.c.user_id == user_id)
         results = await database.fetch_all(query)
         return [row['friend_id'] for row in results] if results else []
-
-    async def get_friends(self, user_id: int) -> List[int]:
-        friend_ids = await self.get_friend_ids(user_id)
-        return friend_ids
     
     async def create_user(self, user: User) -> int:
-        query = user_table.insert().values(**user.model_dump(exclude={"id"}))
+        query = user_table.insert().values(**user.model_dump(exclude={"id", "friends", "favorites"}))
         user_id = await database.execute(query)
         return user_id
 
@@ -139,6 +135,12 @@ class UserRepositoryDB(IUserRepository):
         query = user_table.update().where(user_table.c.id == user_id).values(name=user_data.name)
         await database.execute(query)
 
+    async def get_friends(self, user_id: int) -> List[User]:
+        friend_ids = await self.get_friend_ids(user_id)
+        query = select(user_table).where(user_table.c.id.in_(friend_ids))
+        results = await database.fetch_all(query)
+        return [User.model_validate(result) for result in results]
+    
     async def add_friend(self, user_id: int, friend_id: int) -> None:
         # check if both users exist
         query_user = select(user_table).where(user_table.c.id == user_id)

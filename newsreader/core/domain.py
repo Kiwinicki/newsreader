@@ -21,7 +21,7 @@ class News(BaseModel):
 class User(BaseModel):
     id: int
     name: str
-    favorite: List[News] = []
+    # favorites: List[str] = []
     friends: List[int] = []
 
     model_config = ConfigDict(from_attributes=True, extra="ignore")

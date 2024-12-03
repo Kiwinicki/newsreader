@@ -44,7 +44,7 @@ async def update_user(
 ) -> None:
     return await service.update_user(user_id, user_data)
 
-@user_router.get("/{user_id}/friends", response_model=List[int])
+@user_router.get("/{user_id}/friends", response_model=List[User])
 @inject
 async def get_user_friends(
     user_id: int,

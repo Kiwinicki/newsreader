@@ -1,5 +1,8 @@
 from dependency_injector import containers, providers
-from newsreader.infrastructure.repository import UserRepositoryDB, NewsRepository
+from newsreader.infrastructure.repository import (
+    UserRepositoryDB,
+    NewsRepository,
+)
 from newsreader.infrastructure.service import UserService, NewsService
 
 

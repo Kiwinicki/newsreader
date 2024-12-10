@@ -5,7 +5,12 @@ import os
 from urllib.parse import quote
 from sqlalchemy import select, delete, insert
 from newsreader.core.domain import News, User, NewsPreview
-from newsreader.db import user_table, user_friends_table, user_favorites, database
+from newsreader.db import (
+    user_table,
+    user_friends_table,
+    user_favorites,
+    database,
+)
 from newsreader.core.repository import IUserRepository, INewsRepository
 
 
@@ -33,10 +38,11 @@ class UserRepositoryMock(IUserRepository):
         user_data.id = user_id
         if self.users_db.get(user_id):
             self.users_db[user_id] = user_data
-    
+
+
 class NewsRepository(INewsRepository):
     def __init__(self):
-        self._api_token: str = os.getenv("API_KEY")
+        self._api_token = os.getenv("API_KEY")
         self._base_url = "https://api.thenewsapi.com/v1/news/"
 
     async def get_top(
@@ -55,13 +61,15 @@ class NewsRepository(INewsRepository):
             params["language"] = language
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"{self._base_url}top", params=params) as response:
+            async with session.get(
+                f"{self._base_url}top", params=params
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
                     return data.get("data", [])
                 else:
                     return []
-                
+
     async def get_all(
         self,
         limit: int = 10,
@@ -74,31 +82,34 @@ class NewsRepository(INewsRepository):
             "limit": limit,
         }
         if search:
-            params['search'] = quote(search)
+            params["search"] = quote(search)
         if categories:
             params["categories"] = ",".join(categories)
         if language:
             params["language"] = language
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"{self._base_url}all", params=params) as response:
+            async with session.get(
+                f"{self._base_url}all", params=params
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
                     return data.get("data", [])
                 else:
                     return []
 
-    async def get_by_id(
-        self,
-        news_id: str
-    ) -> News:
+    async def get_by_id(self, news_id: str) -> Optional[News]:
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"{self._base_url}/{news_id}", params={'api_token': self._api_token}) as response:
+            async with session.get(
+                f"{self._base_url}/{news_id}",
+                params={"api_token": self._api_token},
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    return data.get("data", [])
+                    return data.get("data", None)
                 else:
-                    return []
+                    return None
+
 
 class UserRepositoryDB(IUserRepository):
     async def get_by_id(self, user_id: int) -> User | None:
@@ -111,28 +122,37 @@ class UserRepositoryDB(IUserRepository):
         return None
 
     async def get_friend_ids(self, user_id: int) -> List[int]:
-        query = select(user_friends_table.c.friend_id).where(user_friends_table.c.user_id == user_id)
+        query = select(user_friends_table.c.friend_id).where(
+            user_friends_table.c.user_id == user_id
+        )
         results = await database.fetch_all(query)
-        return [row['friend_id'] for row in results] if results else []
-    
+        return [row["friend_id"] for row in results] if results else []
+
     async def create_user(self, user: User) -> int:
-        query = user_table.insert().values(**user.model_dump(exclude={"id", "friends", "favorites"}))
+        query = user_table.insert().values(
+            **user.model_dump(exclude={"id", "friends", "favorites"})
+        )
         user_id = await database.execute(query)
         return user_id
 
     async def delete_user(self, user_id: int) -> None:
-        # first delete user from friends, second delete user 
+        # first delete user from friends, second delete user
         del_friend_query1 = delete(user_friends_table).where(
-            (user_friends_table.c.user_id == user_id) | (user_friends_table.c.friend_id == user_id)
+            (user_friends_table.c.user_id == user_id)
+            | (user_friends_table.c.friend_id == user_id)
         )
         del_user_query2 = delete(user_table).where(user_table.c.id == user_id)
-        
+
         async with database.transaction():
             await database.execute(del_friend_query1)
             await database.execute(del_user_query2)
 
     async def update_user(self, user_id: int, user_data: User) -> None:
-        query = user_table.update().where(user_table.c.id == user_id).values(name=user_data.name)
+        query = (
+            user_table.update()
+            .where(user_table.c.id == user_id)
+            .values(name=user_data.name)
+        )
         await database.execute(query)
 
     async def get_friends(self, user_id: int) -> List[User]:
@@ -140,7 +160,7 @@ class UserRepositoryDB(IUserRepository):
         query = select(user_table).where(user_table.c.id.in_(friend_ids))
         results = await database.fetch_all(query)
         return [User.model_validate(result) for result in results]
-    
+
     async def add_friend(self, user_id: int, friend_id: int) -> None:
         # check if both users exist
         query_user = select(user_table).where(user_table.c.id == user_id)
@@ -149,41 +169,52 @@ class UserRepositoryDB(IUserRepository):
         friend = await database.fetch_one(query_friend)
 
         if user and friend and user_id != friend_id:
-            query1 = insert(user_friends_table).values(user_id=user_id, friend_id=friend_id)
+            query1 = insert(user_friends_table).values(
+                user_id=user_id, friend_id=friend_id
+            )
             await database.execute(query1)
-            query2 = insert(user_friends_table).values(user_id=friend_id, friend_id=user_id)
+            query2 = insert(user_friends_table).values(
+                user_id=friend_id, friend_id=user_id
+            )
             await database.execute(query2)
         else:
             raise ValueError("User or friend not exist")
 
     async def delete_friend(self, user_id: int, friend_id: int) -> None:
         query = delete(user_friends_table).where(
-            (user_friends_table.c.user_id == user_id) & (user_friends_table.c.friend_id == friend_id)
+            (user_friends_table.c.user_id == user_id)
+            & (user_friends_table.c.friend_id == friend_id)
         )
         await database.execute(query)
 
     async def get_favorites(self, user_id: int) -> List[NewsPreview]:
-        query = select(user_favorites.c.news_id, user_favorites.c.title).where(user_favorites.c.user_id == user_id)
+        query = select(user_favorites.c.news_id, user_favorites.c.title).where(
+            user_favorites.c.user_id == user_id
+        )
         results = await database.fetch_all(query)
-        return [NewsPreview(uuid=row["news_id"], title=row["title"]) for row in results] # minimal info (retrive from API for all details)
+        return [
+            NewsPreview(uuid=row["news_id"], title=row["title"])
+            for row in results
+        ]  # minimal info (retrive from API for all details)
 
-    async def add_to_favorites(self, user_id: int, news_id: str, title: str) -> None:
+    async def add_to_favorites(
+        self, user_id: int, news_id: str, title: str
+    ) -> None:
         query = insert(user_favorites).values(
-            user_id=user_id,
-            news_id=news_id,
-            title=title
+            user_id=user_id, news_id=news_id, title=title
         )
         await database.execute(query)
 
     async def delete_from_favorites(self, user_id: int, news_id: str) -> None:
         query = delete(user_favorites).where(
-            (user_favorites.c.user_id == user_id) & (user_favorites.c.news_id == news_id)
+            (user_favorites.c.user_id == user_id)
+            & (user_favorites.c.news_id == news_id)
         )
         await database.execute(query)
 
     async def get_recommended_posts(self, user_id: int) -> List[NewsPreview]:
-        friends = await self.get_favorites(user_id)
-        recommendations = set()
+        friends = await self.get_friends(user_id)
+        recommendations: set = set()
         for friend in friends:
-            recommendations.update(self.get_favorites(friend.user_id))
+            recommendations.update(await self.get_favorites(friend.id))
         return list(recommendations)

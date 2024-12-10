@@ -12,7 +12,7 @@ class UserService(IUserService):
 
     async def get_user_by_id(self, user_id: int) -> Optional[User]:
         return await self._repository.get_by_id(user_id)
-    
+
     async def create_user(self, user: User) -> int:
         return await self._repository.create_user(user)
 
@@ -22,7 +22,7 @@ class UserService(IUserService):
     async def update_user(self, user_id: int, user_data: User) -> None:
         await self._repository.update_user(user_id=user_id, user_data=user_data)
 
-    async def get_friends(self, user_id: int) -> List[int]:
+    async def get_friends(self, user_id: int) -> List[User]:
         return await self._repository.get_friends(user_id)
 
     async def add_friend(self, user_id: int, friend_id: int) -> None:
@@ -30,13 +30,15 @@ class UserService(IUserService):
 
     async def delete_friend(self, user_id: int, friend_id: int) -> None:
         return await self._repository.delete_friend(user_id, friend_id)
-    
+
     async def get_favorites(self, user_id: int) -> List[NewsPreview]:
         return await self._repository.get_favorites(user_id)
 
-    async def add_to_favorites(self, user_id: int, news_id: str, title: str) -> None:
+    async def add_to_favorites(
+        self, user_id: int, news_id: str, title: str
+    ) -> None:
         await self._repository.add_to_favorites(user_id, news_id, title)
-        
+
     async def delete_from_favorites(self, user_id: int, news_id: str) -> None:
         await self._repository.delete_from_favorites(user_id, news_id)
 
@@ -57,7 +59,7 @@ class NewsService(INewsService):
         language: Optional[str] = None,
     ) -> List[News]:
         return await self._repository.get_top(limit, categories, language)
-    
+
     async def get_all_news(
         self,
         limit: int = 10,
@@ -65,7 +67,9 @@ class NewsService(INewsService):
         categories: Optional[List[str]] = None,
         language: Optional[str] = None,
     ) -> List[News]:
-        return await self._repository.get_all(limit, search, categories, language)
+        return await self._repository.get_all(
+            limit, search, categories, language
+        )
 
-    async def get_news_by_id(self, news_id: str) -> List[News]:
+    async def get_news_by_id(self, news_id: str) -> Optional[News]:
         return await self._repository.get_by_id(news_id)

@@ -3,13 +3,10 @@ from typing import List, Optional
 
 from newsreader.core.domain import News, User, NewsPreview
 
+
 class IUserRepository(ABC):
     @abstractmethod
     async def get_by_id(self, user_id: int) -> Optional[User]:
-        pass
-
-    @abstractmethod
-    async def get_by_id(user_id) -> Optional[User]:
         pass
 
     @abstractmethod
@@ -31,7 +28,7 @@ class IUserRepository(ABC):
     @abstractmethod
     async def add_friend(self, user_id: int, friend_id: int) -> None:
         pass
-    
+
     @abstractmethod
     async def delete_friend(self, user_id: int, friend_id: int) -> None:
         pass
@@ -41,7 +38,9 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    async def add_to_favorites(self, user_id: int, news_id: str, title: str) -> None:
+    async def add_to_favorites(
+        self, user_id: int, news_id: str, title: str
+    ) -> None:
         pass
 
     @abstractmethod
@@ -74,8 +73,5 @@ class INewsRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_id(
-        self,
-        news_id: str
-    ) -> List[News]:
+    async def get_by_id(self, news_id: str) -> Optional[News]:
         pass

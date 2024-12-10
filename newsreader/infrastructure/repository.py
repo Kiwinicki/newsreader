@@ -178,3 +178,10 @@ class UserRepositoryDB(IUserRepository):
             (user_favorites.c.user_id == user_id) & (user_favorites.c.news_id == news_id)
         )
         await database.execute(query)
+
+    async def get_recommended_posts(self, user_id: int) -> List[NewsPreview]:
+        friends = await self.get_favorites(user_id)
+        recommendations = set()
+        for friend in friends:
+            recommendations.update(self.get_favorites(friend.user_id))
+        return list(recommendations)

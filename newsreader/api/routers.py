@@ -97,6 +97,15 @@ async def delete_from_favorites(
 ):
     return await user_service.delete_from_favorites(user_id, news_id)
 
+@user_router.get("/{user_id}/recommended")
+@inject
+async def get_recommended_posts(
+    user_id: int,
+    user_service: IUserService = Depends(Provide[Container.user_service]),
+):
+    return await user_service.get_recommended_posts(user_id)
+
+
 
 
 @news_router.get("/top", response_model=List[News])

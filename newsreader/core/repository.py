@@ -48,6 +48,10 @@ class IUserRepository(ABC):
     async def delete_from_favorites(self, user_id: int, news_id: str) -> None:
         pass
 
+    @abstractmethod
+    async def get_recommended_posts(self, user_id: int) -> List[NewsPreview]:
+        pass
+
 
 class INewsRepository(ABC):
     @abstractmethod

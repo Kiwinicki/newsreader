@@ -20,6 +20,7 @@ services:
       - db
     networks:
       - backend
+    restart: always
 
   db:
     image: postgres:17.0-alpine3.20
@@ -27,6 +28,8 @@ services:
       - POSTGRES_DB=app
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=pass
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - backend
 

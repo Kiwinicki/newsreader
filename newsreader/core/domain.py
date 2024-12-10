@@ -2,6 +2,7 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
+
 class News(BaseModel):
     uuid: str
     title: str
@@ -18,11 +19,13 @@ class News(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, extra="ignore")
 
+
 class NewsPreview(BaseModel):
     uuid: str
     title: str
 
     model_config = ConfigDict(from_attributes=True, extra="ignore")
+
 
 class User(BaseModel):
     id: int

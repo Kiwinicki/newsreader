@@ -1,5 +1,6 @@
 import os
-print('API_KEY:', os.getenv('API_KEY'))
+
+print("API_KEY:", os.getenv("API_KEY"))
 
 from fastapi import FastAPI
 from newsreader.api.routers import user_router, news_router

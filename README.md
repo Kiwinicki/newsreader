@@ -1,14 +1,6 @@
 # News reader (API: https://www.thenewsapi.com/)
 
-## Run
-
-### Locally
-
-install project: `make install`
-
-run project: `make run`
-
-### Docker
+## Run in Docker
 
 build: `docker compose build`
 
@@ -31,10 +23,13 @@ stop: `docker compose down` - Removed or `Ctrl+C` - Stopped
 - [x] fastapi routers (user CRUD and top/all/uuid news)
 - [x] repository interface
 - [x] service interface
-- [ ] repository (initial) implementation
+- [x] repository (initial) implementation
 - [x] service (initial) implementation
 - [x] domain models (User, News)
 - [x] dependency injection containers
 - [x] database
 - [x] docker
 - [ ] HTTP exceptions
+- [x] friends
+- [x] recommendations
+- [x] favorites

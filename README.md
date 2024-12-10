@@ -1,14 +1,6 @@
 # News reader (API: https://www.thenewsapi.com/)
 
-## Run
-
-### Locally
-
-install project: `make install`
-
-run project: `make run`
-
-### Docker
+## Run in Docker
 
 build: `docker compose build`
 
@@ -39,4 +31,5 @@ stop: `docker compose down` - Removed or `Ctrl+C` - Stopped
 - [x] docker
 - [ ] HTTP exceptions
 - [x] friends
-- [ ] favorites
+- [x] recommendations
+- [x] favorites

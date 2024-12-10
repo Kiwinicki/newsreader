@@ -149,8 +149,10 @@ class UserRepositoryDB(IUserRepository):
         friend = await database.fetch_one(query_friend)
 
         if user and friend and user_id != friend_id:
-            query = insert(user_friends_table).values(user_id=user_id, friend_id=friend_id)
-            await database.execute(query)
+            query1 = insert(user_friends_table).values(user_id=user_id, friend_id=friend_id)
+            await database.execute(query1)
+            query2 = insert(user_friends_table).values(user_id=friend_id, friend_id=user_id)
+            await database.execute(query2)
         else:
             raise ValueError("User or friend not exist")
 

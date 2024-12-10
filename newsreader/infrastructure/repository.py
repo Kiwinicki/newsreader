@@ -66,10 +66,17 @@ class NewsRepository(INewsRepository):
             ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    return data.get("data", [])
+                    news_list = data.get("data", [])
+                    validated_news = []
+                    for news_data in news_list:
+                        try:
+                            validated_news.append(News.model_validate(news_data))
+                        except (KeyError, ValueError) as e:
+                            print(f"Error parsing news: {e}")
+                    return validated_news
                 else:
                     return []
-
+                
     async def get_all(
         self,
         limit: int = 10,
@@ -94,19 +101,33 @@ class NewsRepository(INewsRepository):
             ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    return data.get("data", [])
+                    news_list = data.get("data", [])
+                    validated_news = []
+                    for news_data in news_list:
+                        try:
+                            validated_news.append(News.model_validate(news_data))
+                        except (KeyError, ValueError) as e:
+                            print(f"Error parsing news: {e}")
+                    return validated_news
                 else:
                     return []
 
     async def get_by_id(self, news_id: str) -> Optional[News]:
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"{self._base_url}/{news_id}",
+                f"{self._base_url}/uuid/{news_id}",
                 params={"api_token": self._api_token},
             ) as response:
                 if response.status == 200:
-                    data = await response.json()
-                    return data.get("data", None)
+                    try:
+                        data = await response.json()
+                        if data:
+                            return News.model_validate(data)
+                        else:
+                            return None
+                    except (KeyError, ValueError, IndexError) as e:
+                        print(f"Error parsing news data: {e}")
+                        return None
                 else:
                     return None
 

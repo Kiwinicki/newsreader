@@ -48,7 +48,7 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_recommended_posts(self, user_id: int) -> List[NewsPreview]:
+    async def get_recommended_news(self, user_id: int) -> List[NewsPreview]:
         pass
 
 

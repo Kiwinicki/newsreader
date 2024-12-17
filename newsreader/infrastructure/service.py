@@ -42,8 +42,8 @@ class UserService(IUserService):
     async def delete_from_favorites(self, user_id: int, news_id: str) -> None:
         await self._repository.delete_from_favorites(user_id, news_id)
 
-    async def get_recommended_posts(self, user_id: int) -> List[NewsPreview]:
-        return await self._repository.get_recommended_posts(user_id)
+    async def get_recommended_news(self, user_id: int) -> List[NewsPreview]:
+        return await self._repository.get_recommended_news(user_id)
 
 
 class NewsService(INewsService):

@@ -19,6 +19,7 @@ async def get_user_by_id(
 ) -> Optional[User]:
     return await service.get_user_by_id(user_id)
 
+
 @user_router.post("/create")
 @inject
 async def create_user(
@@ -27,6 +28,7 @@ async def create_user(
 ) -> int:
     return await service.create_user(user)
 
+
 @user_router.delete("/{user_id}")
 @inject
 async def delete_user(
@@ -34,6 +36,7 @@ async def delete_user(
     service: IUserService = Depends(Provide[Container.user_service]),
 ) -> None:
     return await service.delete_user(user_id)
+
 
 @user_router.put("/{user_id}")
 @inject
@@ -44,6 +47,7 @@ async def update_user(
 ) -> None:
     return await service.update_user(user_id, user_data)
 
+
 @user_router.get("/{user_id}/friends", response_model=List[User])
 @inject
 async def get_user_friends(
@@ -51,6 +55,7 @@ async def get_user_friends(
     service: IUserService = Depends(Provide[Container.user_service]),
 ):
     return await service.get_friends(user_id)
+
 
 @user_router.post("/{user_id}/friends")
 @inject
@@ -61,6 +66,7 @@ async def add_user_friend(
 ):
     return await service.add_friend(user_id, friend_id)
 
+
 @user_router.delete("/{user_id}/friends/{friend_id}")
 @inject
 async def delete_user_friend(
@@ -70,6 +76,7 @@ async def delete_user_friend(
 ):
     return await user_service.delete_friend(user_id, friend_id)
 
+
 @user_router.get("/{user_id}/favorites", response_model=List[NewsPreview])
 @inject
 async def get_favorites(
@@ -77,6 +84,7 @@ async def get_favorites(
     user_service: IUserService = Depends(Provide[Container.user_service]),
 ):
     return await user_service.get_favorites(user_id)
+
 
 @user_router.post("/{user_id}/favorites")
 @inject
@@ -88,6 +96,7 @@ async def add_to_favorites(
 ):
     return await user_service.add_to_favorites(user_id, news_id, title)
 
+
 @user_router.delete("/{user_id}/favorites")
 @inject
 async def delete_from_favorites(
@@ -98,6 +107,14 @@ async def delete_from_favorites(
     return await user_service.delete_from_favorites(user_id, news_id)
 
 
+@user_router.get("/{user_id}/recommended")
+@inject
+async def get_recommended_posts(
+    user_id: int,
+    user_service: IUserService = Depends(Provide[Container.user_service]),
+):
+    return await user_service.get_recommended_posts(user_id)
+
 
 @news_router.get("/top", response_model=List[News])
 @inject
@@ -107,7 +124,10 @@ async def get_top_news(
     language: Optional[str] = None,
     service: INewsService = Depends(Provide[Container.news_service]),
 ) -> List[News]:
-    return await service.get_top_news(limit=limit, categories=categories, language=language)
+    return await service.get_top_news(
+        limit=limit, categories=categories, language=language
+    )
+
 
 @news_router.get("/all", response_model=List[News])
 @inject
@@ -118,12 +138,15 @@ async def get_all_news(
     language: Optional[str] = None,
     service: INewsService = Depends(Provide[Container.news_service]),
 ) -> List[News]:
-    return await service.get_all_news(search=search, limit=limit, categories=categories, language=language)
+    return await service.get_all_news(
+        search=search, limit=limit, categories=categories, language=language
+    )
+
 
 @news_router.get("/{news_id}", response_model=News)
 @inject
 async def get_news_by_id(
     news_id: str,
     service: INewsService = Depends(Provide[Container.news_service]),
-) -> List[News]:
+) -> Optional[News]:
     return await service.get_news_by_id(news_id)

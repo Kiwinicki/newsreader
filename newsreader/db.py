@@ -6,7 +6,7 @@ import databases
 import sqlalchemy
 from sqlalchemy.exc import OperationalError, DatabaseError
 from sqlalchemy.ext.asyncio import create_async_engine
-from asyncpg.exceptions import (    # type: ignore
+from asyncpg.exceptions import (  # type: ignore
     CannotConnectNowError,
     ConnectionDoesNotExistError,
 )
@@ -25,15 +25,32 @@ user_table = sqlalchemy.Table(
 user_friends_table = sqlalchemy.Table(
     "user_friends",
     metadata,
-    sqlalchemy.Column("user_id", sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"), primary_key=True),
-    sqlalchemy.Column("friend_id", sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"), primary_key=True),
+    sqlalchemy.Column(
+        "user_id",
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("users.id"),
+        primary_key=True,
+    ),
+    sqlalchemy.Column(
+        "friend_id",
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("users.id"),
+        primary_key=True,
+    ),
 )
 
 user_favorites = sqlalchemy.Table(
     "user_favorites",
     metadata,
-    sqlalchemy.Column("user_id", sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"), primary_key=True),
-    sqlalchemy.Column("news_id", sqlalchemy.String, nullable=False, primary_key=True),
+    sqlalchemy.Column(
+        "user_id",
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("users.id"),
+        primary_key=True,
+    ),
+    sqlalchemy.Column(
+        "news_id", sqlalchemy.String, nullable=False, primary_key=True
+    ),
     sqlalchemy.Column("title", sqlalchemy.String, nullable=False),
 )
 

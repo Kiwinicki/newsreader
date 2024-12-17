@@ -35,5 +35,8 @@ RUN poetry install --no-interaction --no-ansi
 # Copy project files
 COPY --chown=user:user newsreader ./newsreader
 
+# Copy the SQL initialization script
+COPY --chown=user:user init.sql /docker-entrypoint-initdb.d/init.sql
+
 # Run the app using Poetry
 CMD ["poetry", "run", "uvicorn", "newsreader.main:app", "--host", "0.0.0.0", "--port", "8000"]

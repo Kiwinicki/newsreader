@@ -28,7 +28,7 @@ class IUserService(ABC):
     @abstractmethod
     async def add_friend(self, user_id: int, friend_id: int) -> None:
         pass
-    
+
     @abstractmethod
     async def delete_friend(self, user_id: int, friend_id: int) -> None:
         pass
@@ -38,11 +38,17 @@ class IUserService(ABC):
         pass
 
     @abstractmethod
-    async def add_to_favorites(self, user_id: int, news_id: str, title: str) -> None:
+    async def add_to_favorites(
+        self, user_id: int, news_id: str, title: str
+    ) -> None:
         pass
 
     @abstractmethod
     async def delete_from_favorites(self, user_id: int, news_id: str) -> None:
+        pass
+
+    @abstractmethod
+    async def get_recommended_posts(self, user_id: int) -> List[NewsPreview]:
         pass
 
 
@@ -67,8 +73,5 @@ class INewsService(ABC):
         pass
 
     @abstractmethod
-    async def get_news_by_id(
-        self,
-        news_id: str
-    ) -> List[News]:
+    async def get_news_by_id(self, news_id: str) -> Optional[News]:
         pass

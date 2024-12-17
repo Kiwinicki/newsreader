@@ -70,13 +70,15 @@ class NewsRepository(INewsRepository):
                     validated_news = []
                     for news_data in news_list:
                         try:
-                            validated_news.append(News.model_validate(news_data))
+                            validated_news.append(
+                                News.model_validate(news_data)
+                            )
                         except (KeyError, ValueError) as e:
                             print(f"Error parsing news: {e}")
                     return validated_news
                 else:
                     return []
-                
+
     async def get_all(
         self,
         limit: int = 10,
@@ -105,7 +107,9 @@ class NewsRepository(INewsRepository):
                     validated_news = []
                     for news_data in news_list:
                         try:
-                            validated_news.append(News.model_validate(news_data))
+                            validated_news.append(
+                                News.model_validate(news_data)
+                            )
                         except (KeyError, ValueError) as e:
                             print(f"Error parsing news: {e}")
                     return validated_news

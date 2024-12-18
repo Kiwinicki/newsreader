@@ -25,6 +25,7 @@ async def get_user_by_id(
         user = await service.get_user_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
+        return user
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
 
@@ -163,6 +164,7 @@ async def get_top_news(
         )
         if not news:
             raise HTTPException(status_code=404, detail=f'News not found')
+        return news
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
 
@@ -182,6 +184,7 @@ async def get_all_news(
         )
         if not news:
             raise HTTPException(status_code=404, detail=f'News not found')
+        return news
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
 
@@ -196,5 +199,6 @@ async def get_news_by_id(
         news = await service.get_news_by_id(news_id)
         if not news:
             raise HTTPException(status_code=404, detail=f'News not found')
+        return news
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")

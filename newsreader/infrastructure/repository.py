@@ -139,18 +139,7 @@ class NewsRepository(INewsRepository):
                     return None
 
 
-async def _handle_db_error(func):
-    """Helper to handle database errors"""
-    async def wrapper(*args, **kwargs):
-       try:
-           return await func(*args, **kwargs)
-       except SQLAlchemyError as e:
-           raise HTTPException(status_code=500, detail=f"Database error: {e}")
-    return wrapper
-
-
 class UserRepositoryDB(IUserRepository):
-    @_handle_db_error
     async def get_by_id(self, user_id: int) -> User | None:
         query = user_table.select().where(user_table.c.id == user_id)
         result = await database.fetch_one(query)
@@ -160,7 +149,6 @@ class UserRepositoryDB(IUserRepository):
             return user
         return None
 
-    @_handle_db_error
     async def get_friend_ids(self, user_id: int) -> List[int]:
         query = select(user_friends_table.c.friend_id).where(
             user_friends_table.c.user_id == user_id
@@ -168,7 +156,6 @@ class UserRepositoryDB(IUserRepository):
         results = await database.fetch_all(query)
         return [row["friend_id"] for row in results] if results else []
 
-    @_handle_db_error
     async def create_user(self, user: User) -> int:
         query = user_table.insert().values(
             **user.model_dump(exclude={"id", "friends", "favorites"})
@@ -176,7 +163,6 @@ class UserRepositoryDB(IUserRepository):
         user_id = await database.execute(query)
         return user_id
 
-    @_handle_db_error
     async def delete_user(self, user_id: int) -> None:
         # first delete user from friends, then delete user
         del_friend_query1 = delete(user_friends_table).where(
@@ -189,7 +175,6 @@ class UserRepositoryDB(IUserRepository):
             await database.execute(del_friend_query1)
             await database.execute(del_user_query2)
 
-    @_handle_db_error
     async def update_user(self, user_id: int, user_data: User) -> None:
         query = (
             user_table.update()
@@ -198,14 +183,12 @@ class UserRepositoryDB(IUserRepository):
         )
         await database.execute(query)
 
-    @_handle_db_error
     async def get_friends(self, user_id: int) -> List[User]:
         friend_ids = await self.get_friend_ids(user_id)
         query = select(user_table).where(user_table.c.id.in_(friend_ids))
         results = await database.fetch_all(query)
         return [User.model_validate(result) for result in results]
 
-    @_handle_db_error
     async def add_friend(self, user_id: int, friend_id: int) -> None:
         # check if both users exist
         query_user = select(user_table).where(user_table.c.id == user_id)
@@ -225,7 +208,6 @@ class UserRepositoryDB(IUserRepository):
         else:
             raise ValueError("User or friend not exist")
 
-    @_handle_db_error
     async def delete_friend(self, user_id: int, friend_id: int) -> None:
         query = delete(user_friends_table).where(
             (user_friends_table.c.user_id == user_id)
@@ -233,7 +215,6 @@ class UserRepositoryDB(IUserRepository):
         )
         await database.execute(query)
 
-    @_handle_db_error
     async def get_favorites(self, user_id: int) -> List[NewsPreview]:
         query = select(user_favorites.c.news_id, user_favorites.c.title).where(
             user_favorites.c.user_id == user_id
@@ -244,7 +225,6 @@ class UserRepositoryDB(IUserRepository):
             for row in results
         ]  # minimal info (retrive from API for all details)
 
-    @_handle_db_error
     async def add_to_favorites(
         self, user_id: int, news_id: str, title: str
     ) -> None:
@@ -253,7 +233,6 @@ class UserRepositoryDB(IUserRepository):
         )
         await database.execute(query)
 
-    @_handle_db_error
     async def delete_from_favorites(self, user_id: int, news_id: str) -> None:
         query = delete(user_favorites).where(
             (user_favorites.c.user_id == user_id)
@@ -261,7 +240,6 @@ class UserRepositoryDB(IUserRepository):
         )
         await database.execute(query)
 
-    @_handle_db_error
     async def get_recommended_news(self, user_id: int) -> List[NewsPreview]:
         friends = await self.get_friends(user_id)
         recommendations: set = set()

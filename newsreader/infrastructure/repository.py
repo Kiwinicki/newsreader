@@ -146,6 +146,7 @@ class UserRepositoryDB(IUserRepository):
         if result:
             user = User.model_validate(result)
             user.friends = await self.get_friend_ids(user_id)
+            user.favorites = await self.get_favorites(user_id)
             return user
         return None
 

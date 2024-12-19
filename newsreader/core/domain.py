@@ -26,6 +26,9 @@ class NewsPreview(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, extra="ignore")
 
+    def __hash__(self):
+        return hash(self.uuid)
+
 
 class User(BaseModel):
     id: int

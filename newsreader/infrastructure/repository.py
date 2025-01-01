@@ -50,9 +50,11 @@ async def _handle_api_response(response: aiohttp.ClientResponse):
     except aiohttp.ClientError as e:
         raise HTTPException(status_code=500, detail=f"Network error: {e}")
     except HTTPException as e:
-        raise HTTPException(status_code=response.status, detail=f"API Error: {e.detail}") # Raise the already created HTTP Exception
+        raise HTTPException(
+            status_code=response.status, detail=f"API Error: {e.detail}"
+        )
     except Exception as e:
-         raise HTTPException(status_code=500, detail=f"Unknown error: {e}")
+        raise HTTPException(status_code=500, detail=f"Unknown error: {e}")
 
 
 class NewsRepository(INewsRepository):
@@ -84,13 +86,10 @@ class NewsRepository(INewsRepository):
                 validated_news = []
                 for news_data in news_list:
                     try:
-                        validated_news.append(
-                            News.model_validate(news_data)
-                        )
+                        validated_news.append(News.model_validate(news_data))
                     except (KeyError, ValueError) as e:
                         print(f"Error parsing news: {e}")
                 return validated_news
-
 
     async def get_all(
         self,
@@ -119,9 +118,7 @@ class NewsRepository(INewsRepository):
                 validated_news = []
                 for news_data in news_list:
                     try:
-                        validated_news.append(
-                            News.model_validate(news_data)
-                        )
+                        validated_news.append(News.model_validate(news_data))
                     except (KeyError, ValueError) as e:
                         print(f"Error parsing news: {e}")
                 return validated_news

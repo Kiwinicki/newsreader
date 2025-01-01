@@ -5,13 +5,16 @@ from newsreader.core.service import IUserService, INewsService
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException
 
+
 def _handle_db_error(func):
     """Helper to handle database errors"""
+
     async def wrapper(*args, **kwargs):
-       try:
-           return await func(*args, **kwargs)
-       except SQLAlchemyError as e:
-           raise HTTPException(status_code=500, detail=f"Database error: {e}")
+        try:
+            return await func(*args, **kwargs)
+        except SQLAlchemyError as e:
+            raise HTTPException(status_code=500, detail=f"Database error: {e}")
+
     return wrapper
 
 
@@ -81,9 +84,9 @@ class NewsService(INewsService):
         language: Optional[str] = None,
     ) -> List[News]:
         try:
-             return await self._repository.get_top(limit, categories, language)
+            return await self._repository.get_top(limit, categories, language)
         except Exception as e:
-             raise HTTPException(status_code=500, detail=f"Server error: {e}")
+            raise HTTPException(status_code=500, detail=f"Server error: {e}")
 
     async def get_all_news(
         self,
@@ -93,12 +96,12 @@ class NewsService(INewsService):
         language: Optional[str] = None,
     ) -> List[News]:
         try:
-           return await self._repository.get_all(
-              limit, search, categories, language
+            return await self._repository.get_all(
+                limit, search, categories, language
             )
         except Exception as e:
-             raise HTTPException(status_code=500, detail=f"Server error: {e}")
-        
+            raise HTTPException(status_code=500, detail=f"Server error: {e}")
+
     async def get_news_by_id(self, news_id: str) -> Optional[News]:
         try:
             news = await self._repository.get_by_id(news_id)

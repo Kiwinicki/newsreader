@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS user_favorites (
 INSERT INTO users (name) VALUES ('Alice'), ('Bob'), ('Charlie');
 
 -- Insert user friendships
-INSERT INTO user_friends (user_id, friend_id) VALUES (1, 2), (2, 1), (1, 3), (3, 1);
+INSERT INTO user_friends (user_id, friend_id) VALUES (1, 2), (2, 1), (1, 3), (3, 1), (3, 2);
 
 -- Alice's favorites
 INSERT INTO user_favorites (user_id, news_id, title) VALUES

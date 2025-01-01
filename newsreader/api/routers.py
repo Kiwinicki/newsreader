@@ -28,6 +28,7 @@ async def get_all_users(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
 
+
 @user_router.get("/{user_id}", response_model=Optional[User])
 @inject
 async def get_user_by_id(
@@ -41,6 +42,7 @@ async def get_user_by_id(
         return user
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
+
 
 @user_router.post("/create")
 @inject
@@ -113,6 +115,7 @@ async def delete_user_friend(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
 
+
 @user_router.get("/{user_id}/favorites", response_model=List[NewsPreview])
 @inject
 async def get_favorites(
@@ -151,6 +154,7 @@ async def delete_from_favorites(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
 
+
 @user_router.get("/{user_id}/recommended")
 @inject
 async def get_recommended_news(
@@ -161,6 +165,7 @@ async def get_recommended_news(
         return await user_service.get_recommended_news(user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
+
 
 @news_router.get("/top", response_model=List[News])
 @inject
@@ -175,7 +180,7 @@ async def get_top_news(
             limit=limit, categories=categories, language=language
         )
         if not news:
-            raise HTTPException(status_code=404, detail=f'News not found')
+            raise HTTPException(status_code=404, detail=f"News not found")
         return news
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
@@ -195,7 +200,7 @@ async def get_all_news(
             search=search, limit=limit, categories=categories, language=language
         )
         if not news:
-            raise HTTPException(status_code=404, detail=f'News not found')
+            raise HTTPException(status_code=404, detail=f"News not found")
         return news
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
@@ -210,7 +215,7 @@ async def get_news_by_id(
     try:
         news = await service.get_news_by_id(news_id)
         if not news:
-            raise HTTPException(status_code=404, detail=f'News not found')
+            raise HTTPException(status_code=404, detail=f"News not found")
         return news
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")

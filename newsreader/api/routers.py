@@ -15,6 +15,19 @@ user_router = APIRouter()
 news_router = APIRouter()
 
 
+@user_router.get("/all", response_model=List[User])
+@inject
+async def get_all_users(
+    service: IUserService = Depends(Provide[Container.user_service]),
+) -> List[User]:
+    try:
+        users = await service.get_all_users()
+        if not users:
+            raise HTTPException(status_code=404, detail="No user was found")
+        return users
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Server error: {e}")
+
 @user_router.get("/{user_id}", response_model=Optional[User])
 @inject
 async def get_user_by_id(
@@ -28,7 +41,6 @@ async def get_user_by_id(
         return user
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
-
 
 @user_router.post("/create")
 @inject
@@ -72,7 +84,7 @@ async def update_user(
 async def get_user_friends(
     user_id: int,
     service: IUserService = Depends(Provide[Container.user_service]),
-):
+) -> List[User]:
     return await service.get_friends(user_id)
 
 
@@ -82,7 +94,7 @@ async def add_user_friend(
     user_id: int,
     friend_id: int,
     service: IUserService = Depends(Provide[Container.user_service]),
-):
+) -> None:
     try:
         return await service.add_friend(user_id, friend_id)
     except Exception as e:
@@ -95,7 +107,7 @@ async def delete_user_friend(
     user_id: int,
     friend_id: int,
     user_service: IUserService = Depends(Provide[Container.user_service]),
-):
+) -> None:
     try:
         return await user_service.delete_friend(user_id, friend_id)
     except Exception as e:
@@ -106,7 +118,7 @@ async def delete_user_friend(
 async def get_favorites(
     user_id: int,
     user_service: IUserService = Depends(Provide[Container.user_service]),
-):
+) -> List[NewsPreview]:
     try:
         return await user_service.get_favorites(user_id)
     except Exception as e:
@@ -120,7 +132,7 @@ async def add_to_favorites(
     news_id: str,
     title: str,
     user_service: IUserService = Depends(Provide[Container.user_service]),
-):
+) -> None:
     try:
         return await user_service.add_to_favorites(user_id, news_id, title)
     except Exception as e:
@@ -133,7 +145,7 @@ async def delete_from_favorites(
     user_id: int,
     news_id: str,
     user_service: IUserService = Depends(Provide[Container.user_service]),
-):
+) -> None:
     try:
         return await user_service.delete_from_favorites(user_id, news_id)
     except Exception as e:
@@ -144,7 +156,7 @@ async def delete_from_favorites(
 async def get_recommended_news(
     user_id: int,
     user_service: IUserService = Depends(Provide[Container.user_service]),
-):
+) -> List[NewsPreview]:
     try:
         return await user_service.get_recommended_news(user_id)
     except Exception as e:

@@ -140,6 +140,17 @@ class NewsRepository(INewsRepository):
 
 
 class UserRepositoryDB(IUserRepository):
+    async def get_all(self) -> List[User]:
+        query = user_table.select()
+        results = await database.fetch_all(query)
+        users = []
+        for row in results:
+            user = User.model_validate(row)
+            user.friends = await self.get_friend_ids(user.id)
+            users.append(user)
+
+        return users
+
     async def get_by_id(self, user_id: int) -> User | None:
         query = user_table.select().where(user_table.c.id == user_id)
         result = await database.fetch_one(query)

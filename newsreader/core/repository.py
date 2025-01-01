@@ -6,6 +6,10 @@ from newsreader.core.domain import News, User, NewsPreview
 
 class IUserRepository(ABC):
     @abstractmethod
+    async def get_all(self) -> List[User]:
+        pass
+
+    @abstractmethod
     async def get_by_id(self, user_id: int) -> Optional[User]:
         pass
 

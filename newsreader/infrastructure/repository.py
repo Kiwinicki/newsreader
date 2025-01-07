@@ -52,7 +52,7 @@ async def _handle_api_response(response: aiohttp.ClientResponse):
     except HTTPException as e:
         raise HTTPException(
             status_code=response.status, detail=f"API Error: {e.detail}"
-        )
+        )  # Raise the already created HTTP Exception
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unknown error: {e}")
 
@@ -137,6 +137,17 @@ class NewsRepository(INewsRepository):
 
 
 class UserRepositoryDB(IUserRepository):
+    async def get_all(self) -> List[User]:
+        query = user_table.select()
+        results = await database.fetch_all(query)
+        users = []
+        for row in results:
+            user = User.model_validate(row)
+            user.friends = await self.get_friend_ids(user.id)
+            users.append(user)
+
+        return users
+
     async def get_by_id(self, user_id: int) -> User | None:
         query = user_table.select().where(user_table.c.id == user_id)
         result = await database.fetch_one(query)
@@ -162,7 +173,9 @@ class UserRepositoryDB(IUserRepository):
         return user_id
 
     async def delete_user(self, user_id: int) -> None:
-        # first delete user from friends, then delete user
+        del_favorites_query = delete(user_favorites).where(
+            user_favorites.c.user_id == user_id
+        )
         del_friend_query1 = delete(user_friends_table).where(
             (user_friends_table.c.user_id == user_id)
             | (user_friends_table.c.friend_id == user_id)
@@ -170,16 +183,78 @@ class UserRepositoryDB(IUserRepository):
         del_user_query2 = delete(user_table).where(user_table.c.id == user_id)
 
         async with database.transaction():
+            await database.execute(del_favorites_query)
             await database.execute(del_friend_query1)
             await database.execute(del_user_query2)
 
     async def update_user(self, user_id: int, user_data: User) -> None:
-        query = (
-            user_table.update()
-            .where(user_table.c.id == user_id)
-            .values(name=user_data.name)
-        )
-        await database.execute(query)
+        async with database.transaction():
+            # update the user name
+            query = (
+                user_table.update()
+                .where(user_table.c.id == user_id)
+                .values(name=user_data.name)
+            )
+            await database.execute(query)
+
+            # fetch all existing user id
+            existing_users = await database.fetch_all(select(user_table.c.id))
+            existing_user_ids = {row["id"] for row in existing_users}
+
+            # validate friends
+            for friend_id in user_data.friends:
+                if friend_id not in existing_user_ids:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Friend with ID {friend_id} does not exist.",
+                    )
+                if friend_id == user_id:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Cannot add yourself as a friend.",
+                    )
+
+            # delete existing friends
+            delete_friends_query = user_friends_table.delete().where(
+                (user_friends_table.c.user_id == user_id)
+                | (user_friends_table.c.friend_id == user_id)
+            )
+            await database.execute(delete_friends_query)
+
+            # insert new friends with bidirectional relationships
+            if user_data.friends:
+                insert_friends = []
+                for friend_id in user_data.friends:
+                    insert_friends.append(
+                        {"user_id": user_id, "friend_id": friend_id}
+                    )
+                    insert_friends.append(
+                        {"user_id": friend_id, "friend_id": user_id}
+                    )
+                await database.execute_many(
+                    user_friends_table.insert(), insert_friends
+                )
+
+            # delete existing favorites
+            delete_favorites_query = user_favorites.delete().where(
+                user_favorites.c.user_id == user_id
+            )
+            await database.execute(delete_favorites_query)
+
+            # insert new favorites
+            if user_data.favorites:
+                insert_favorites = []
+                for favorite in user_data.favorites:
+                    insert_favorites.append(
+                        {
+                            "user_id": user_id,
+                            "news_id": favorite.uuid,
+                            "title": favorite.title,
+                        }
+                    )
+                await database.execute_many(
+                    user_favorites.insert(), insert_favorites
+                )
 
     async def get_friends(self, user_id: int) -> List[User]:
         friend_ids = await self.get_friend_ids(user_id)
@@ -207,11 +282,17 @@ class UserRepositoryDB(IUserRepository):
             raise ValueError("User or friend not exist")
 
     async def delete_friend(self, user_id: int, friend_id: int) -> None:
-        query = delete(user_friends_table).where(
+        query1 = delete(user_friends_table).where(
             (user_friends_table.c.user_id == user_id)
             & (user_friends_table.c.friend_id == friend_id)
         )
-        await database.execute(query)
+        await database.execute(query1)
+
+        query2 = delete(user_friends_table).where(
+            (user_friends_table.c.user_id == friend_id)
+            & (user_friends_table.c.friend_id == user_id)
+        )
+        await database.execute(query2)
 
     async def get_favorites(self, user_id: int) -> List[NewsPreview]:
         query = select(user_favorites.c.news_id, user_favorites.c.title).where(
@@ -240,7 +321,12 @@ class UserRepositoryDB(IUserRepository):
 
     async def get_recommended_news(self, user_id: int) -> List[NewsPreview]:
         friends = await self.get_friends(user_id)
-        recommendations: set = set()
+        recommendations = []
+        seen_news_ids = set()
         for friend in friends:
-            recommendations.update(await self.get_favorites(friend.id))
-        return list(recommendations)
+            favorites = await self.get_favorites(friend.id)
+            for favorite in favorites:
+                if favorite.uuid not in seen_news_ids:
+                    recommendations.append(favorite)
+                    seen_news_ids.add(favorite.uuid)
+        return recommendations

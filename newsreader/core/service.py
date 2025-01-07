@@ -6,6 +6,10 @@ from newsreader.core.domain import News, User, NewsPreview
 
 class IUserService(ABC):
     @abstractmethod
+    async def get_all_users(self) -> List[User]:
+        pass
+
+    @abstractmethod
     async def get_user_by_id(self, user_id: int) -> Optional[User]:
         pass
 

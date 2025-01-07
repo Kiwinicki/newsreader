@@ -25,6 +25,10 @@ class UserService(IUserService):
         self._repository = repository
 
     @_handle_db_error
+    async def get_all_users(self) -> List[User]:
+        return await self._repository.get_all()
+
+    @_handle_db_error
     async def get_user_by_id(self, user_id: int) -> Optional[User]:
         return await self._repository.get_by_id(user_id)
 
@@ -103,10 +107,4 @@ class NewsService(INewsService):
             raise HTTPException(status_code=500, detail=f"Server error: {e}")
 
     async def get_news_by_id(self, news_id: str) -> Optional[News]:
-        try:
-            news = await self._repository.get_by_id(news_id)
-            if not news:
-                raise HTTPException(status_code=404, detail="News not found")
-            return news
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Server error: {e}")
+        return await self._repository.get_by_id(news_id)

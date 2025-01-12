@@ -22,11 +22,9 @@ remove: `docker compose down`
 - `/api`: FastAPI routers, uses services from `/core` (handles requests from client)
 
 ## TODO:
-- [x] fastapi routers (user CRUD and top/all/uuid news)
-- [x] repository interface
-- [x] service interface
-- [x] repository implementation
-- [x] service implementation
+- [x] fastapi routers (get all/by_id/favorites/friends/read_later user and top/all/by_id news)
+- [x] repository, service interface
+- [x] repository, service implementation
 - [x] domain models (User, News)
 - [x] dependency injection containers
 - [x] database (with inital SQL data)
@@ -35,3 +33,4 @@ remove: `docker compose down`
 - [x] friends
 - [x] recommendations
 - [x] favorites
+- [x] read_later

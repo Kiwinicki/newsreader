@@ -43,4 +43,4 @@ INSERT INTO user_favorites (user_id, news_id, title) VALUES
 -- Alice's read later
 INSERT INTO user_read_later (user_id, news_id, title) VALUES
     (1, 'e7869452-a34c-40c4-9330-de4433ee76ff', 'Banana Republic Outlet Sale: 50% off Everything, +20% off with $6 Finds'),
-    (1, '6a957f44-22c6-4d2f-82b1-0044f2acef9b', 'Spider-Man\'s Marisa Tomei Reacts to Tom Holland\'s Engagement");
+    (1, '6a957f44-22c6-4d2f-82b1-0044f2acef9b', 'Spider-Man''s Marisa Tomei Reacts to Tom Holland''s Engagement');

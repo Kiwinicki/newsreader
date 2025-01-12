@@ -145,6 +145,8 @@ class UserRepositoryDB(IUserRepository):
         for row in results:
             user = User.model_validate(row)
             user.friends = await self.get_friend_ids(user.id)
+            user.favorites = await self.get_favorites(user.id)
+            user.read_later = await self.get_read_later(user.id)
             users.append(user)
 
         return users

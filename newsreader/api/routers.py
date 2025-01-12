@@ -166,6 +166,43 @@ async def get_recommended_news(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e}")
 
+@user_router.get("/{user_id}/read-later", response_model=List[NewsPreview])
+@inject
+async def get_read_later(
+    user_id: int,
+    user_service: IUserService = Depends(Provide[Container.user_service]),
+) -> List[NewsPreview]:
+    try:
+        return await user_service.get_read_later(user_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Server error: {e}")
+
+
+@user_router.post("/{user_id}/read-later")
+@inject
+async def add_read_later(
+    user_id: int,
+    news_id: str,
+    title: str,
+    user_service: IUserService = Depends(Provide[Container.user_service]),
+) -> None:
+    try:
+        return await user_service.add_read_later(user_id, news_id, title)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Server error: {e}")
+
+
+@user_router.delete("/{user_id}/read-later")
+@inject
+async def delete_read_later(
+    user_id: int,
+    news_id: str,
+    user_service: IUserService = Depends(Provide[Container.user_service]),
+) -> None:
+    try:
+        return await user_service.delete_read_later(user_id, news_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Server error: {e}")
 
 @news_router.get("/top", response_model=List[News])
 @inject

@@ -55,6 +55,18 @@ class IUserRepository(ABC):
     async def get_recommended_news(self, user_id: int) -> List[NewsPreview]:
         pass
 
+    @abstractmethod
+    async def get_read_later(self, user_id: int) -> List[NewsPreview]:
+        pass
+
+    @abstractmethod
+    async def add_read_later(self, user_id: int, news_id: str, title: str) -> None:
+        pass
+
+    @abstractmethod
+    async def delete_read_later(self, user_id: int, news_id: str) -> None:
+        pass
+
 
 class INewsRepository(ABC):
     @abstractmethod

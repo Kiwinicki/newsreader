@@ -13,7 +13,15 @@ CREATE TABLE IF NOT EXISTS user_friends (
 CREATE TABLE IF NOT EXISTS user_favorites (
     user_id INTEGER REFERENCES users(id),
     news_id VARCHAR(255) NOT NULL,
-    title VARCHAR(255) NOT NULL,
+    title TEXT NOT NULL,
+    PRIMARY KEY (user_id, news_id)
+);
+
+-- Table to store user read later
+CREATE TABLE IF NOT EXISTS user_read_later (
+    user_id INTEGER REFERENCES users(id),
+    news_id VARCHAR(255 ) NOT NULL,
+    title TEXT NOT NULL,
     PRIMARY KEY (user_id, news_id)
 );
 
@@ -31,3 +39,8 @@ INSERT INTO user_favorites (user_id, news_id, title) VALUES
 -- Bob's favorites
 INSERT INTO user_favorites (user_id, news_id, title) VALUES
     (2, '96ce3bea-c2a7-4145-a36d-7c93c5d9b529', 'How UnitedHealthcare became the face of a broken health care system');
+
+-- Alice's read later
+INSERT INTO user_read_later (user_id, news_id, title) VALUES
+    (1, 'e7869452-a34c-40c4-9330-de4433ee76ff', 'Banana Republic Outlet Sale: 50% off Everything, +20% off with $6 Finds'),
+    (1, '6a957f44-22c6-4d2f-82b1-0044f2acef9b', 'Spider-Man\'s Marisa Tomei Reacts to Tom Holland\'s Engagement");

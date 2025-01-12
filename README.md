@@ -25,8 +25,8 @@ remove: `docker compose down`
 - [x] fastapi routers (user CRUD and top/all/uuid news)
 - [x] repository interface
 - [x] service interface
-- [x] repository (initial) implementation
-- [x] service (initial) implementation
+- [x] repository implementation
+- [x] service implementation
 - [x] domain models (User, News)
 - [x] dependency injection containers
 - [x] database (with inital SQL data)

@@ -35,5 +35,6 @@ class User(BaseModel):
     name: str
     favorites: List[NewsPreview] = []
     friends: List[int] = []
+    read_later: List[NewsPreview] = []
 
     model_config = ConfigDict(from_attributes=True, extra="ignore")

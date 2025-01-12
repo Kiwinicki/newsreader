@@ -39,9 +39,24 @@ user_friends_table = sqlalchemy.Table(
     ),
 )
 
-user_favorites = sqlalchemy.Table(
+user_favorites_table = sqlalchemy.Table(
     "user_favorites",
     metadata,
+    sqlalchemy.Column(
+        "user_id",
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("users.id"),
+        primary_key=True,
+    ),
+    sqlalchemy.Column(
+        "news_id", sqlalchemy.String, nullable=False, primary_key=True
+    ),
+    sqlalchemy.Column("title", sqlalchemy.String, nullable=False),
+)
+
+read_later_table = sqlalchemy.Table(
+    "user_read_later",
+    sqlalchemy.MetaData(),
     sqlalchemy.Column(
         "user_id",
         sqlalchemy.Integer,

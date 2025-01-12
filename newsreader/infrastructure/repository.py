@@ -9,7 +9,8 @@ from newsreader.core.domain import News, User, NewsPreview
 from newsreader.db import (
     user_table,
     user_friends_table,
-    user_favorites,
+    user_favorites_table,
+    read_later_table,
     database,
 )
 from newsreader.core.repository import IUserRepository, INewsRepository
@@ -144,6 +145,8 @@ class UserRepositoryDB(IUserRepository):
         for row in results:
             user = User.model_validate(row)
             user.friends = await self.get_friend_ids(user.id)
+            user.favorites = await self.get_favorites(user.id)
+            user.read_later = await self.get_read_later(user.id)
             users.append(user)
 
         return users
@@ -155,6 +158,7 @@ class UserRepositoryDB(IUserRepository):
             user = User.model_validate(result)
             user.friends = await self.get_friend_ids(user_id)
             user.favorites = await self.get_favorites(user_id)
+            user.read_later = await self.get_read_later(user_id)
             return user
         return None
 
@@ -167,14 +171,19 @@ class UserRepositoryDB(IUserRepository):
 
     async def create_user(self, user: User) -> int:
         query = user_table.insert().values(
-            **user.model_dump(exclude={"id", "friends", "favorites"})
+            **user.model_dump(
+                exclude={"id", "friends", "favorites", "read_later"}
+            )
         )
         user_id = await database.execute(query)
         return user_id
 
     async def delete_user(self, user_id: int) -> None:
-        del_favorites_query = delete(user_favorites).where(
-            user_favorites.c.user_id == user_id
+        del_favorites_query = delete(user_favorites_table).where(
+            user_favorites_table.c.user_id == user_id
+        )
+        del_read_later_query = delete(read_later_table).where(
+            read_later_table.c.user_id == user_id
         )
         del_friend_query1 = delete(user_friends_table).where(
             (user_friends_table.c.user_id == user_id)
@@ -184,6 +193,7 @@ class UserRepositoryDB(IUserRepository):
 
         async with database.transaction():
             await database.execute(del_favorites_query)
+            await database.execute(del_read_later_query)
             await database.execute(del_friend_query1)
             await database.execute(del_user_query2)
 
@@ -236,8 +246,8 @@ class UserRepositoryDB(IUserRepository):
                 )
 
             # delete existing favorites
-            delete_favorites_query = user_favorites.delete().where(
-                user_favorites.c.user_id == user_id
+            delete_favorites_query = user_favorites_table.delete().where(
+                user_favorites_table.c.user_id == user_id
             )
             await database.execute(delete_favorites_query)
 
@@ -253,7 +263,28 @@ class UserRepositoryDB(IUserRepository):
                         }
                     )
                 await database.execute_many(
-                    user_favorites.insert(), insert_favorites
+                    user_favorites_table.insert(), insert_favorites
+                )
+
+            # delete existing read later
+            delete_read_later_query = read_later_table.delete().where(
+                read_later_table.c.user_id == user_id
+            )
+            await database.execute(delete_read_later_query)
+
+            # insert new read later
+            if user_data.read_later:
+                insert_read_later = []
+                for read_later in user_data.read_later:
+                    insert_read_later.append(
+                        {
+                            "user_id": user_id,
+                            "news_id": read_later.uuid,
+                            "title": read_later.title,
+                        }
+                    )
+                await database.execute_many(
+                    read_later_table.insert(), insert_read_later
                 )
 
     async def get_friends(self, user_id: int) -> List[User]:
@@ -295,9 +326,9 @@ class UserRepositoryDB(IUserRepository):
         await database.execute(query2)
 
     async def get_favorites(self, user_id: int) -> List[NewsPreview]:
-        query = select(user_favorites.c.news_id, user_favorites.c.title).where(
-            user_favorites.c.user_id == user_id
-        )
+        query = select(
+            user_favorites_table.c.news_id, user_favorites_table.c.title
+        ).where(user_favorites_table.c.user_id == user_id)
         results = await database.fetch_all(query)
         return [
             NewsPreview(uuid=row["news_id"], title=row["title"])
@@ -307,15 +338,15 @@ class UserRepositoryDB(IUserRepository):
     async def add_to_favorites(
         self, user_id: int, news_id: str, title: str
     ) -> None:
-        query = insert(user_favorites).values(
+        query = insert(user_favorites_table).values(
             user_id=user_id, news_id=news_id, title=title
         )
         await database.execute(query)
 
     async def delete_from_favorites(self, user_id: int, news_id: str) -> None:
-        query = delete(user_favorites).where(
-            (user_favorites.c.user_id == user_id)
-            & (user_favorites.c.news_id == news_id)
+        query = delete(user_favorites_table).where(
+            (user_favorites_table.c.user_id == user_id)
+            & (user_favorites_table.c.news_id == news_id)
         )
         await database.execute(query)
 
@@ -330,3 +361,28 @@ class UserRepositoryDB(IUserRepository):
                     recommendations.append(favorite)
                     seen_news_ids.add(favorite.uuid)
         return recommendations
+
+    async def get_read_later(self, user_id: int) -> List[NewsPreview]:
+        query = select(
+            read_later_table.c.news_id, read_later_table.c.title
+        ).where(read_later_table.c.user_id == user_id)
+        results = await database.fetch_all(query)
+        return [
+            NewsPreview(uuid=row["news_id"], title=row["title"])
+            for row in results
+        ]
+
+    async def add_read_later(
+        self, user_id: int, news_id: str, title: str
+    ) -> None:
+        query = insert(read_later_table).values(
+            user_id=user_id, news_id=news_id, title=title
+        )
+        await database.execute(query)
+
+    async def delete_read_later(self, user_id: int, news_id: str) -> None:
+        query = delete(read_later_table).where(
+            (read_later_table.c.user_id == user_id)
+            & (read_later_table.c.news_id == news_id)
+        )
+        await database.execute(query)

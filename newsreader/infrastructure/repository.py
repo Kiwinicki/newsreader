@@ -171,7 +171,9 @@ class UserRepositoryDB(IUserRepository):
 
     async def create_user(self, user: User) -> int:
         query = user_table.insert().values(
-            **user.model_dump(exclude={"id", "friends", "favorites", "read_later"})
+            **user.model_dump(
+                exclude={"id", "friends", "favorites", "read_later"}
+            )
         )
         user_id = await database.execute(query)
         return user_id
@@ -263,7 +265,7 @@ class UserRepositoryDB(IUserRepository):
                 await database.execute_many(
                     user_favorites_table.insert(), insert_favorites
                 )
-            
+
             # delete existing read later
             delete_read_later_query = read_later_table.delete().where(
                 read_later_table.c.user_id == user_id
@@ -324,9 +326,9 @@ class UserRepositoryDB(IUserRepository):
         await database.execute(query2)
 
     async def get_favorites(self, user_id: int) -> List[NewsPreview]:
-        query = select(user_favorites_table.c.news_id, user_favorites_table.c.title).where(
-            user_favorites_table.c.user_id == user_id
-        )
+        query = select(
+            user_favorites_table.c.news_id, user_favorites_table.c.title
+        ).where(user_favorites_table.c.user_id == user_id)
         results = await database.fetch_all(query)
         return [
             NewsPreview(uuid=row["news_id"], title=row["title"])
@@ -359,18 +361,20 @@ class UserRepositoryDB(IUserRepository):
                     recommendations.append(favorite)
                     seen_news_ids.add(favorite.uuid)
         return recommendations
-    
+
     async def get_read_later(self, user_id: int) -> List[NewsPreview]:
-         query = select(read_later_table.c.news_id, read_later_table.c.title).where(
-            read_later_table.c.user_id == user_id
-        )
-         results = await database.fetch_all(query)
-         return [
+        query = select(
+            read_later_table.c.news_id, read_later_table.c.title
+        ).where(read_later_table.c.user_id == user_id)
+        results = await database.fetch_all(query)
+        return [
             NewsPreview(uuid=row["news_id"], title=row["title"])
             for row in results
         ]
 
-    async def add_read_later(self, user_id: int, news_id: str, title: str) -> None:
+    async def add_read_later(
+        self, user_id: int, news_id: str, title: str
+    ) -> None:
         query = insert(read_later_table).values(
             user_id=user_id, news_id=news_id, title=title
         )

@@ -60,7 +60,9 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    async def add_read_later(self, user_id: int, news_id: str, title: str) -> None:
+    async def add_read_later(
+        self, user_id: int, news_id: str, title: str
+    ) -> None:
         pass
 
     @abstractmethod

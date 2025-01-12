@@ -73,18 +73,20 @@ class UserService(IUserService):
     @_handle_db_error
     async def get_recommended_news(self, user_id: int) -> List[NewsPreview]:
         return await self._repository.get_recommended_news(user_id)
-    
+
     @_handle_db_error
     async def get_read_later(self, user_id: int) -> List[NewsPreview]:
         return await self._repository.get_read_later(user_id)
 
     @_handle_db_error
-    async def add_read_later(self, user_id: int, news_id: str, title: str) -> None:
+    async def add_read_later(
+        self, user_id: int, news_id: str, title: str
+    ) -> None:
         await self._repository.add_read_later(user_id, news_id, title)
 
     @_handle_db_error
     async def delete_read_later(self, user_id: int, news_id: str) -> None:
-         await self._repository.delete_read_later(user_id, news_id)
+        await self._repository.delete_read_later(user_id, news_id)
 
 
 class NewsService(INewsService):
